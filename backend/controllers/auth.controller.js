@@ -1,6 +1,9 @@
 const User = require("../models/User.model");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const { validationResult } = require("express-validator");
+const { generateOTP } = require("../utils/otp");
+const { sendOTP } = require("../utils/email");
 
 const MAX_ATTEMPTS = 5;
 const LOCK_TIME = 15 * 60 * 1000; // 15 minutes
@@ -24,29 +27,46 @@ exports.register = async (req, res) => {
       message: "User registered securely",
       userId: user._id
     });
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: "Registration failed" });
   }
 };
 
-/* LOGIN with MFA */
+/* LOGIN WITH MFA */
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    if (!user)
+      return res.status(401).json({ message: "Invalid credentials" });
 
-    if (user.isLocked())
-      return res.status(423).json({ message: "Account locked" });
+    /* Check lock */
+    if (user.lockUntil && user.lockUntil > Date.now()) {
+      return res.status(423).json({
+        message: "Account locked. Try again later."
+      });
+    }
 
     const isMatch = await user.comparePassword(password);
+
+    /* ❗ UPDATED LOCKOUT LOGIC */
     if (!isMatch) {
       user.failedLoginAttempts += 1;
+
+      if (user.failedLoginAttempts >= MAX_ATTEMPTS) {
+        user.lockUntil = Date.now() + LOCK_TIME;
+      }
+
       await user.save();
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    /* Reset failed attempts on success */
+    user.failedLoginAttempts = 0;
+    user.lockUntil = undefined;
+
+    /* Generate OTP */
     const { otp, hashedOtp } = generateOTP();
 
     user.mfaCode = hashedOtp;
@@ -56,11 +76,15 @@ exports.login = async (req, res) => {
     await user.save();
     await sendOTP(user.email, otp);
 
-    res.json({ message: "OTP sent to email", userId: user._id });
+    res.json({
+      message: "OTP sent to email",
+      userId: user._id
+    });
   } catch {
     res.status(500).json({ message: "Login failed" });
   }
 };
+
 /* VERIFY OTP */
 exports.verifyOTP = async (req, res) => {
   const { userId, otp } = req.body;
@@ -87,5 +111,9 @@ exports.verifyOTP = async (req, res) => {
     { expiresIn: "15m" }
   );
 
-  res.json({ message: "MFA verified", token });
+  res.json({
+    message: "MFA verified",
+    token,
+    role: user.role
+  });
 };

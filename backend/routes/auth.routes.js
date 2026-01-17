@@ -1,8 +1,6 @@
 const express = require("express");
 const { body } = require("express-validator");
 const authController = require("../controllers/auth.controller");
-router.post("/verify-otp", authController.verifyOTP);
-
 
 const router = express.Router();
 
@@ -31,5 +29,8 @@ router.post(
   ],
   authController.login
 );
+
+/* Verify OTP (MFA) */
+router.post("/verify-otp", authController.verifyOTP);
 
 module.exports = router;

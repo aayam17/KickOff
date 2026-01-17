@@ -2,14 +2,37 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+
     products: [
       {
-        productId: mongoose.Schema.Types.ObjectId,
-        quantity: Number
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1
+        }
       }
     ],
-    totalAmount: Number,
+
+    totalAmount: {
+      type: Number,
+      required: true
+    },
+
+    /* Stripe reference */
+    paymentIntentId: {
+      type: String
+    },
+
     paymentStatus: {
       type: String,
       enum: ["pending", "paid"],
