@@ -29,50 +29,63 @@ exports.register = async (req, res) => {
   }
 };
 
-/* LOGIN */
+/* LOGIN with MFA */
 exports.login = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() });
-
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user)
-      return res.status(401).json({ message: "Invalid credentials" });
+    if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
     if (user.isLocked())
-      return res.status(423).json({ message: "Account temporarily locked" });
+      return res.status(423).json({ message: "Account locked" });
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       user.failedLoginAttempts += 1;
-
-      if (user.failedLoginAttempts >= MAX_ATTEMPTS) {
-        user.lockUntil = Date.now() + LOCK_TIME;
-        user.failedLoginAttempts = 0;
-      }
-
       await user.save();
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    user.failedLoginAttempts = 0;
-    user.lockUntil = undefined;
+    const { otp, hashedOtp } = generateOTP();
+
+    user.mfaCode = hashedOtp;
+    user.mfaCodeExpiry = Date.now() + 5 * 60 * 1000;
+    user.mfaEnabled = true;
+
     await user.save();
+    await sendOTP(user.email, otp);
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "15m" }
-    );
-
-    res.status(200).json({
-      message: "Login successful",
-      token
-    });
-  } catch (err) {
+    res.json({ message: "OTP sent to email", userId: user._id });
+  } catch {
     res.status(500).json({ message: "Login failed" });
   }
+};
+/* VERIFY OTP */
+exports.verifyOTP = async (req, res) => {
+  const { userId, otp } = req.body;
+
+  const user = await User.findById(userId);
+  if (!user || !user.mfaCodeExpiry)
+    return res.status(400).json({ message: "Invalid request" });
+
+  if (user.mfaCodeExpiry < Date.now())
+    return res.status(400).json({ message: "OTP expired" });
+
+  const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+  if (hashedOtp !== user.mfaCode)
+    return res.status(401).json({ message: "Invalid OTP" });
+
+  user.mfaCode = undefined;
+  user.mfaCodeExpiry = undefined;
+  await user.save();
+
+  const token = jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "15m" }
+  );
+
+  res.json({ message: "MFA verified", token });
 };
