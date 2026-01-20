@@ -1,11 +1,4 @@
 import api from "./axios";
 
-export const createOrder = (data, token) =>
-  api.post("/orders", data, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-
-export const fetchMyOrders = token =>
-  api.get("/orders/my", {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+export const createOrder = (data) => api.post("/orders", data);
+export const fetchMyOrders = () => api.get("/orders/my");

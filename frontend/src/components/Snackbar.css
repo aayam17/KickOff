@@ -1,0 +1,135 @@
+.snackbar-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999; /* High z-index to ensure visibility */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 400px;
+  pointer-events: none; /* Allow clicking through container */
+}
+
+.snackbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.1);
+  min-width: 300px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-left: 4px solid;
+  pointer-events: auto; /* Allow clicking on snackbar */
+  backdrop-filter: blur(10px);
+}
+
+.snackbar-show {
+  animation: slideInRight 0.3s ease-out;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.snackbar-hide {
+  animation: slideOutRight 0.3s ease-in;
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.snackbar-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.snackbar-message {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1a1f3a;
+  line-height: 1.4;
+}
+
+/* Snackbar Types */
+.snackbar-success {
+  border-left-color: #00c853;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+.snackbar-success .snackbar-icon {
+  color: #00c853;
+}
+
+.snackbar-error {
+  border-left-color: #ff3d00;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+.snackbar-error .snackbar-icon {
+  color: #ff3d00;
+}
+
+.snackbar-warning {
+  border-left-color: #ffc107;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+}
+
+.snackbar-warning .snackbar-icon {
+  color: #f59e0b;
+}
+
+.snackbar-info {
+  border-left-color: #2979ff;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.snackbar-info .snackbar-icon {
+  color: #2979ff;
+}
+
+/* Animations */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .snackbar-container {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    max-width: none;
+  }
+  
+  .snackbar {
+    min-width: unset;
+    width: 100%;
+  }
+}
+
+/* Ensure it's above everything else */
+.snackbar-container {
+  z-index: 99999 !important;
+}

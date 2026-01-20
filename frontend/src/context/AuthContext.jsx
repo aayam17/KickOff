@@ -5,14 +5,15 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true); // Added loading state
 
-  /* Restore auth on refresh */
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("auth"));
     if (saved) {
       setToken(saved.token);
       setRole(saved.role);
     }
+    setLoading(false); // Finished checking localStorage
   }, []);
 
   const loginUser = (jwt, userRole) => {
@@ -31,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, role, loginUser, logout }}>
+    <AuthContext.Provider value={{ token, role, loading, loginUser, logout }}>
       {children}
     </AuthContext.Provider>
   );
