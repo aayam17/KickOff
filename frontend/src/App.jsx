@@ -11,6 +11,12 @@ import Checkout from "./pages/Checkout";
 import VerifyOTP from "./pages/VerifyOTP";
 import Profile from "./pages/Profile";
 
+// Info pages
+import ContactUs from "./pages/info/ContactUs";
+import ShippingInfo from "./pages/info/ShippingInfo";
+import SizeGuide from "./pages/info/SizeGuide";
+import AboutUs from "./pages/info/AboutUs";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import Navbar from "./components/Navbar";
@@ -20,15 +26,23 @@ function App() {
   return (
     <SnackbarProvider>
       <BrowserRouter>
+
         {/* Global Navigation */}
         <Navbar />
 
         <Routes>
+
           {/* Public routes */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-otp" element={<VerifyOTP />} />
+
+          {/* Info pages */}
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/shipping" element={<ShippingInfo />} />
+          <Route path="/size-guide" element={<SizeGuide />} />
+          <Route path="/about" element={<AboutUs />} />
 
           {/* User protected routes */}
           <Route
@@ -78,10 +92,12 @@ function App() {
               </ProtectedRoute>
             }
           />
+
         </Routes>
 
         {/* Global Footer */}
         <Footer />
+
       </BrowserRouter>
     </SnackbarProvider>
   );
