@@ -1,122 +1,162 @@
+
+/* Smooth transitions for system feedback (Doherty Threshold - <400ms) */
+* {
+  transition: all 0.25s ease;
+}
+
 .home-page {
   min-height: 100vh;
   padding-bottom: 60px;
 }
 
-/* Hero Section */
+/* ============================================
+   HERO SECTION - Peak-End Rule (Strong First Impression)
+   ============================================ */
 .hero-section {
   position: relative;
   min-height: 500px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 80px 20px 60px;
+  background: linear-gradient(135deg, #0d1117 0%, #1a1f2e 100%);
   overflow: hidden;
-  padding: 80px 20px;
 }
 
+/* Simple, clean background pattern (Law of Prägnanz) */
 .hero-background {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, var(--dark) 0%, var(--dark-lighter) 50%, var(--dark) 100%);
+  opacity: 0.4;
 }
 
 .hero-pattern {
   position: absolute;
   inset: 0;
   background-image: 
-    radial-gradient(circle at 20% 50%, rgba(0, 200, 83, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 107, 0, 0.1) 0%, transparent 50%),
-    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px);
+    radial-gradient(circle at 25% 25%, rgba(0, 200, 83, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(0, 200, 83, 0.08) 0%, transparent 50%);
 }
 
 .hero-content {
   position: relative;
   z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .hero-text {
   text-align: center;
-  max-width: 800px;
+  max-width: 700px;
   margin: 0 auto;
 }
 
+/* Clear visual hierarchy (Gestalt Principles) */
 .hero-title {
-  font-size: 3.5rem;
+  font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 800;
-  margin-bottom: 1.5rem;
-  line-height: 1.1;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+  color: #ffffff;
 }
 
-.hero-subtitle {
-  font-size: 1.25rem;
-  color: var(--text-secondary);
-  margin-bottom: 3rem;
-  line-height: 1.6;
-}
-
-.hero-stats {
-  display: flex;
-  justify-content: center;
-  gap: 60px;
-  flex-wrap: wrap;
-}
-
-.stat-item {
-  text-align: center;
-}
-
-.stat-number {
-  font-size: 2.5rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+/* Von Restorff Effect - Make key term stand out */
+.text-gradient {
+  background: linear-gradient(135deg, #00c853 0%, #00e676 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 0.5rem;
+}
+
+.hero-subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: #8b949e;
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Miller's Law - Chunk info into 3 digestible stats */
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: clamp(30px, 8vw, 60px);
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+/* Law of Proximity - Group related information */
+.stat-item {
+  text-align: center;
+  padding: 1rem;
+}
+
+.stat-number {
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  font-weight: 800;
+  color: #00c853;
+  display: block;
+  margin-bottom: 0.25rem;
 }
 
 .stat-label {
-  color: var(--text-secondary);
-  font-size: 1rem;
+  color: #8b949e;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 600;
 }
 
-/* Search Section */
+/* ============================================
+   SEARCH SECTION - Recognition over Recall
+   ============================================ */
 .search-section {
   padding: 40px 20px;
   background: var(--dark-card);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
 }
 
 .search-wrapper {
-  max-width: 800px;
+  max-width: 700px;
   margin: 0 auto;
 }
 
+/* Fitts's Law - Large, easy-to-click search box */
 .search-box {
   position: relative;
   display: flex;
   align-items: center;
   background: var(--dark-lighter);
-  border: 2px solid var(--border);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 4px;
-  transition: all var(--transition-fast);
 }
 
+/* Visibility of System Status - Clear focus state */
 .search-box:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.15);
+  background: rgba(0, 200, 83, 0.03);
 }
 
+/* Recognition - Familiar search icon position */
 .search-icon {
   position: absolute;
   left: 16px;
-  color: var(--text-secondary);
+  color: #8b949e;
   pointer-events: none;
+  z-index: 1;
+}
+
+.search-box:focus-within .search-icon {
+  color: var(--primary);
 }
 
 .search-input {
@@ -126,71 +166,82 @@
   border: none;
   color: var(--text);
   font-size: 1rem;
-}
-
-.search-input:focus {
   outline: none;
-  border: none;
-  box-shadow: none;
 }
 
+.search-input::placeholder {
+  color: #6e7681;
+}
+
+/* Fitts's Law - Large clear button for easy clicking */
 .search-clear {
-  padding: 8px;
-  background: transparent;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
   border: none;
-  color: var(--text-secondary);
+  color: #8b949e;
   cursor: pointer;
-  border-radius: 6px;
-  transition: all var(--transition-fast);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
 }
 
 .search-clear:hover {
-  background: var(--dark);
+  background: rgba(244, 67, 54, 0.15);
   color: var(--error);
 }
 
+/* Visibility of System Status - Show results count */
 .search-results-count {
   text-align: center;
   margin-top: 16px;
-  color: var(--text-secondary);
+  color: #8b949e;
   font-size: 0.95rem;
+  font-weight: 500;
 }
 
-/* Products Section */
+/* ============================================
+   PRODUCTS SECTION - Law of Common Region
+   ============================================ */
 .products-section {
   padding: 60px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
+/* Law of Similarity - Consistent grid pattern */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 24px;
 }
 
+/* Law of Common Region - Clear card boundaries */
 .product-card {
   background: var(--dark-card);
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid var(--border);
-  transition: all var(--transition-normal);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
+/* Aesthetic-Usability Effect - Subtle hover feedback <400ms */
 .product-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--primary);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  border-color: rgba(0, 200, 83, 0.3);
 }
 
+/* Jakob's Law - Familiar e-commerce card layout */
 .product-image-container {
   position: relative;
   width: 100%;
-  padding-top: 100%;
-  background: linear-gradient(135deg, var(--dark-lighter), var(--dark));
+  padding-top: 100%; /* 1:1 aspect ratio */
+  background: linear-gradient(135deg, #1a1f2e, #0d1117);
   overflow: hidden;
 }
 
@@ -201,13 +252,13 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--transition-slow);
 }
 
 .product-card:hover .product-image {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
+/* Von Restorff Effect - Important badges stand out */
 .product-badge {
   position: absolute;
   top: 12px;
@@ -216,25 +267,26 @@
   color: white;
   padding: 6px 12px;
   border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   gap: 4px;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 2px 8px rgba(0, 200, 83, 0.4);
+  z-index: 2;
 }
 
 .product-low-stock {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: var(--warning);
-  color: var(--dark);
+  background: #ff6d00;
+  color: white;
   padding: 6px 12px;
   border-radius: 20px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  box-shadow: var(--shadow-md);
+  z-index: 2;
 }
 
 .product-out-of-stock {
@@ -245,11 +297,12 @@
   color: white;
   padding: 6px 12px;
   border-radius: 20px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  box-shadow: var(--shadow-md);
+  z-index: 2;
 }
 
+/* Law of Proximity - Group related product info */
 .product-content {
   padding: 20px;
   display: flex;
@@ -258,14 +311,17 @@
   flex: 1;
 }
 
+/* Clear visual hierarchy - Team name first */
 .product-team {
   color: var(--primary);
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 0.85rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
+  margin-bottom: -4px;
 }
 
+/* Most important info - Product name */
 .product-name {
   font-size: 1.25rem;
   font-weight: 700;
@@ -274,15 +330,19 @@
   line-height: 1.3;
 }
 
+/* Law of Proximity - Price and stock together */
 .product-price-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin: 8px 0;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* Von Restorff Effect - Price stands out */
 .product-price {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 800;
   color: var(--text);
   display: flex;
@@ -290,11 +350,13 @@
 }
 
 .currency {
-  font-size: 1.2rem;
+  font-size: 1rem;
   margin-right: 2px;
   margin-top: 4px;
+  opacity: 0.7;
 }
 
+/* Visibility of System Status - Clear stock indication */
 .product-stock-info {
   display: flex;
   align-items: center;
@@ -305,16 +367,23 @@
   align-items: center;
   gap: 4px;
   color: var(--success);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 4px 10px;
+  border-radius: 12px;
 }
 
 .out-of-stock-text {
   color: var(--error);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
+  background: rgba(244, 67, 54, 0.1);
+  padding: 4px 10px;
+  border-radius: 12px;
 }
 
+/* Progressive Disclosure - Size selection when needed */
 .product-sizes {
   margin: 8px 0;
 }
@@ -322,153 +391,243 @@
 .size-label {
   display: block;
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: #8b949e;
   margin-bottom: 8px;
   font-weight: 600;
 }
 
+/* Hick's Law - Clear, limited size options */
 .size-options {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
+/* Fitts's Law - Large enough buttons (min 44x44px) */
 .size-btn {
-  padding: 8px 16px;
-  border: 2px solid var(--border);
+  min-width: 48px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
   background: var(--dark-lighter);
   color: var(--text);
-  border-radius: 8px;
-  font-weight: 600;
+  border-radius: 10px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  font-size: 0.95rem;
 }
 
+/* Visibility of System Status - Clear selected state */
 .size-btn:hover {
   border-color: var(--primary);
-  background: rgba(0, 200, 83, 0.1);
+  background: rgba(0, 200, 83, 0.08);
 }
 
 .size-btn.active {
   border-color: var(--primary);
   background: var(--primary);
   color: white;
+  box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.15);
 }
 
+/* Fitts's Law - Large CTA button */
 .btn-add-to-cart {
   width: 100%;
   margin-top: auto;
+  min-height: 48px;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  padding: 14px 24px;
 }
 
-/* No Results */
+/* Doherty Threshold - Instant feedback <400ms */
+.btn-add-to-cart:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 200, 83, 0.3);
+}
+
+.btn-add-to-cart:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-add-to-cart:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   NO RESULTS - Helpful Error State
+   ============================================ */
 .no-results {
   text-align: center;
   padding: 80px 20px;
-  color: var(--text-secondary);
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .no-results svg {
   margin-bottom: 24px;
-  opacity: 0.5;
+  opacity: 0.3;
 }
 
 .no-results h3 {
   color: var(--text);
   margin-bottom: 12px;
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
 .no-results p {
   margin-bottom: 24px;
+  color: #8b949e;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
-/* Features Section */
+/* ============================================
+   FEATURES SECTION - Consistency & Standards
+   ============================================ */
 .features-section {
   padding: 80px 20px;
-  background: var(--dark-card);
-  border-top: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--dark-card) 0%, var(--dark) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .section-title {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
   margin-bottom: 60px;
+  font-weight: 800;
+  text-align: center;
 }
 
+/* Miller's Law - 3 features (7±2 rule) */
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 40px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
+/* Law of Common Region - Clear feature cards */
 .feature-card {
   text-align: center;
-  padding: 40px 20px;
+  padding: 40px 30px;
+  background: var(--dark-card);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.feature-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(0, 200, 83, 0.2);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Von Restorff Effect - Icon draws attention */
 .feature-icon {
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
   margin: 0 auto 24px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  border-radius: 20px;
+  background: linear-gradient(135deg, var(--primary), #00e676);
+  border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: var(--shadow-glow);
+  box-shadow: 0 8px 16px rgba(0, 200, 83, 0.3);
 }
 
 .feature-card h3 {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   margin-bottom: 12px;
   color: var(--text);
+  font-weight: 700;
 }
 
 .feature-card p {
-  color: var(--text-secondary);
+  color: #8b949e;
   line-height: 1.6;
   margin: 0;
+  font-size: 1rem;
 }
 
-/* Responsive */
+/* ============================================
+   RESPONSIVE - Mobile First Approach
+   ============================================ */
 @media (max-width: 768px) {
-  .hero-title {
-    font-size: 2.5rem;
-  }
-
-  .hero-subtitle {
-    font-size: 1.1rem;
-  }
-
-  .stat-number {
-    font-size: 2rem;
+  .hero-section {
+    padding: 60px 20px 40px;
+    min-height: 400px;
   }
 
   .hero-stats {
-    gap: 40px;
+    gap: 24px;
+  }
+
+  .search-section {
+    position: relative;
   }
 
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
   }
 
-  .section-title {
-    font-size: 2rem;
+  .features-grid {
+    gap: 30px;
   }
 }
 
 @media (max-width: 480px) {
-  .hero-title {
-    font-size: 2rem;
+  .hero-stats {
+    flex-direction: row;
+    gap: 20px;
+  }
+
+  .stat-item {
+    flex: 1;
+    min-width: 80px;
   }
 
   .products-grid {
     grid-template-columns: 1fr;
   }
 
-  .hero-stats {
-    gap: 30px;
+  .product-card {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY & USABILITY
+   ============================================ */
+
+/* Focus states for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .product-card,
+  .feature-card,
+  .search-box {
+    border-width: 2px;
   }
 }
