@@ -53,6 +53,7 @@ export default function Footer() {
             <div className="footer-section">
               <h3 className="footer-title">Support</h3>
               <ul className="footer-links">
+                <li><Link to="/contact">Contact Us</Link></li>
                 <li><Link to="/shipping">Shipping Info</Link></li>
                 <li><Link to="/size-guide">Size Guide</Link></li>
               </ul>

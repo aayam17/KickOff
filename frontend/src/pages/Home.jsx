@@ -10,6 +10,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSize, setSelectedSize] = useState({});
+  const [sortBy, setSortBy] = useState("default");
   const { addToCart } = useContext(CartContext);
   const { success, error } = useSnackbar();
 
@@ -26,11 +27,9 @@ export default function Home() {
   }, []);
 
   const handleAddToCart = (product) => {
-    // Clear user feedback - Visibility of System Status
     const size = selectedSize[product._id];
     if (!size) {
       error("Please select a size first");
-      // Focus size selection for better UX
       const sizeSection = document.querySelector(`[data-product-id="${product._id}"] .size-options`);
       if (sizeSection) {
         sizeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -39,12 +38,28 @@ export default function Home() {
     }
     addToCart({ ...product, selectedSize: size });
     success(`✓ ${product.name} (${size}) added to cart!`);
+    // Clear size selection after adding to cart
+    setSelectedSize(prev => {
+      const updated = { ...prev };
+      delete updated[product._id];
+      return updated;
+    });
   };
 
-  const filteredProducts = products.filter(p =>
+  // Filter products
+  let filteredProducts = products.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.team.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Sort products
+  if (sortBy === "price-low") {
+    filteredProducts = [...filteredProducts].sort((a, b) => a.price - b.price);
+  } else if (sortBy === "price-high") {
+    filteredProducts = [...filteredProducts].sort((a, b) => b.price - a.price);
+  } else if (sortBy === "name") {
+    filteredProducts = [...filteredProducts].sort((a, b) => a.name.localeCompare(b.name));
+  }
 
   if (loading) {
     return <Loader fullscreen message="Loading jerseys..." />;
@@ -52,10 +67,11 @@ export default function Home() {
 
   return (
     <div className="home-page">
-      {/* Hero Section - Peak-End Rule: Strong first impression */}
+      {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-background">
           <div className="hero-pattern"></div>
+          <div className="hero-gradient"></div>
         </div>
         <div className="container hero-content">
           <div className="hero-text">
@@ -65,7 +81,6 @@ export default function Home() {
             <p className="hero-subtitle">
               Authentic jerseys from the world's top clubs. Fast shipping, guaranteed quality.
             </p>
-            {/* Miller's Law - Chunking info into 3 digestible stats */}
             <div className="hero-stats">
               <div className="stat-item">
                 <span className="stat-number" aria-label={`${products.length} jerseys available`}>
@@ -86,10 +101,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Search Section - Recognition over Recall: Familiar search pattern */}
+      {/* Search and Filter Section */}
       <section className="search-section" role="search">
         <div className="container">
-          <div className="search-wrapper">
+          <div className="search-filter-wrapper">
             <div className="search-box">
               <svg 
                 className="search-icon" 
@@ -113,7 +128,6 @@ export default function Home() {
                 aria-label="Search jerseys"
                 autoComplete="off"
               />
-              {/* Progressive Disclosure - Show clear only when needed */}
               {searchTerm && (
                 <button 
                   className="search-clear"
@@ -128,19 +142,41 @@ export default function Home() {
                 </button>
               )}
             </div>
-            {/* Visibility of System Status - Show search results count */}
-            <div className="search-results-count" role="status" aria-live="polite">
-              {filteredProducts.length} {filteredProducts.length === 1 ? 'Jersey' : 'Jerseys'} Found
+            
+            <div className="filter-controls">
+              <label htmlFor="sort-select" className="filter-label">Sort by:</label>
+              <select 
+                id="sort-select"
+                className="filter-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                aria-label="Sort products"
+              >
+                <option value="default">Featured</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="name">Name: A to Z</option>
+              </select>
             </div>
+          </div>
+          
+          <div className="search-results-info">
+            <span className="results-count" role="status" aria-live="polite">
+              {filteredProducts.length} {filteredProducts.length === 1 ? 'Jersey' : 'Jerseys'}
+            </span>
+            {searchTerm && (
+              <span className="search-term">
+                matching "<strong>{searchTerm}</strong>"
+              </span>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Products Section - Law of Common Region: Clear product boundaries */}
+      {/* Products Section */}
       <section className="products-section" aria-label="Product catalog">
         <div className="container">
           {filteredProducts.length === 0 ? (
-            // Helpful error state with clear action
             <div className="no-results" role="status">
               <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                 <circle cx="12" cy="12" r="10"/>
@@ -166,22 +202,25 @@ export default function Home() {
                   data-product-id={product._id}
                   aria-label={`${product.name} jersey`}
                 >
-                  {/* Visual hierarchy - Image first */}
                   <div className="product-image-container">
                     <img 
                       src={product.image} 
                       alt={`${product.name} ${product.team} jersey`}
                       className="product-image"
                       loading="lazy"
+                      onError={(e) => {
+                        e.target.src = 'https://via.placeholder.com/400x400?text=Jersey+Image';
+                      }}
                     />
-                    {/* Von Restorff Effect - Important badges stand out */}
+                    <div className="product-overlay">
+                      <span className="quick-view">Quick View</span>
+                    </div>
                     <span className="product-badge" aria-label="Official product">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                       </svg>
                       Official
                     </span>
-                    {/* Visibility of System Status - Clear stock warnings */}
                     {product.stock < 10 && product.stock > 0 && (
                       <span className="product-low-stock" role="status">
                         Only {product.stock} left!
@@ -194,7 +233,6 @@ export default function Home() {
                     )}
                   </div>
 
-                  {/* Law of Proximity - Group related product information */}
                   <div className="product-content">
                     <div className="product-team">{product.team}</div>
                     <h3 className="product-name">{product.name}</h3>
@@ -218,13 +256,11 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* Progressive Disclosure - Show size selection only when available */}
                     {product.size && product.size.length > 0 && (
                       <div className="product-sizes">
                         <label className="size-label" id={`size-label-${product._id}`}>
                           Select Size:
                         </label>
-                        {/* Hick's Law - Limited, clear choices */}
                         <div 
                           className="size-options" 
                           role="group" 
@@ -249,7 +285,6 @@ export default function Home() {
                       </div>
                     )}
 
-                    {/* Fitts's Law - Large, easy-to-click CTA */}
                     <button
                       className="btn btn-primary btn-add-to-cart"
                       onClick={() => handleAddToCart(product)}
@@ -272,11 +307,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section - Consistency & Standards: Expected trust signals */}
+      {/* Features Section */}
       <section className="features-section" aria-label="Why choose us">
         <div className="container">
           <h2 className="section-title">Why Choose KickOff?</h2>
-          {/* Miller's Law - 3 key features (7±2 items) */}
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon" aria-hidden="true">
