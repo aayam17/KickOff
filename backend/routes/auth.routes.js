@@ -4,7 +4,7 @@ const authController = require("../controllers/auth.controller");
 
 const router = express.Router();
 
-/* Register */
+// Register 
 router.post(
   "/register",
   [
@@ -20,7 +20,7 @@ router.post(
   authController.register
 );
 
-/* Login */
+// Login 
 router.post(
   "/login",
   [
@@ -30,7 +30,7 @@ router.post(
   authController.login
 );
 
-/* Verify OTP (MFA) */
+// Verify OTP (MFA) 
 router.post("/verify-otp", authController.verifyOTP);
 
 module.exports = router;

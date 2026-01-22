@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post("/", auth, controller.createOrder);
 router.get("/my", auth, controller.getMyOrders);
-router.get("/:id", auth, controller.getOrderById); // FETCH SINGLE ORDER
+router.get("/:id", auth, controller.getOrderById); 
 router.get("/", auth, role("admin"), controller.getAllOrders);
 
 module.exports = router;

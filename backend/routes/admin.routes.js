@@ -5,16 +5,16 @@ const productController = require("../controllers/product.controller");
 
 const router = express.Router();
 
-// ADMIN: Create product 
+// Create product 
 router.post("/", auth, role("admin"), productController.createProduct);
 
-// ADMIN: Get all products 
+// Get all products 
 router.get("/", auth, role("admin"), productController.getAllProducts);
 
-// ADMIN: Update product
+// Update product
 router.put("/:id", auth, role("admin"), productController.updateProduct);
 
-// ADMIN: Delete product 
+// Delete product 
 router.delete("/:id", auth, role("admin"), productController.deleteProduct);
 
 module.exports = router;
