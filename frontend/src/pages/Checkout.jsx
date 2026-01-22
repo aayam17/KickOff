@@ -26,35 +26,32 @@ export default function Checkout() {
   const orderCreatedRef = useRef(false);
 
   useEffect(() => {
-    // 1. Wait for AuthContext to finish loading the token from localStorage
+
     if (authLoading) return;
 
-    // 2. Security Check: If no token after loading, boot to login
     if (!token) {
       error("Please login to continue");
       navigate("/login");
       return;
     }
 
-    // 3. Logic Check: Ensure we have an order ID or a cart
     if (id === "cart" && cart.length === 0) {
       error("Your cart is empty");
       navigate("/cart");
       return;
     }
 
-    // 4. Prevent duplicate API calls
     if (!orderCreatedRef.current) {
       orderCreatedRef.current = true;
       fetchOrderAndIntent();
     }
-  }, [id, token, authLoading]); // Dependencies updated for reliability
+  }, [id, token, authLoading]); 
 
   const fetchOrderAndIntent = async () => {
     try {
       setLoading(true);
 
-      // Verify token exists before making API calls
+
       if (!token) {
         throw new Error("No authentication token found");
       }

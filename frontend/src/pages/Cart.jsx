@@ -19,14 +19,14 @@ export default function Cart() {
   const handleCheckout = () => {
     if (cart.length === 0) return;
 
-    // 1. Check if user is logged in before moving to checkout
+    // Check if user is logged in before moving to checkout
     if (!token) {
       error("Please login to proceed to checkout");
       navigate("/login");
       return;
     }
 
-    // 2. Navigate to checkout. 
+    // Navigate to checkout. 
     navigate("/checkout/cart");
   };
 
