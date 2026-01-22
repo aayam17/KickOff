@@ -18,8 +18,7 @@ export default function AboutUs() {
               purchase genuine merchandise from their favorite teams around the world.
             </p>
             <p>
-              What started as a small online store has grown into a trusted destination for football enthusiasts 
-              across the globe. Today, we're proud to offer an extensive collection of official jerseys from top 
+              Today, we're proud to offer an extensive collection of official jerseys from top 
               clubs and national teams, all guaranteed to be 100% authentic.
             </p>
           </div>
