@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
+const USER_ROLES = ["user", "admin"];
+const SALT_ROUNDS = 12;
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -25,7 +28,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: USER_ROLES,
       default: "user"
     },
 
@@ -57,16 +60,14 @@ const userSchema = new mongoose.Schema(
       default: Date.now
     }
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true }
 );
 
 /* Hash password before saving */
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
-  const salt = await bcrypt.genSalt(12);
+  const salt = await bcrypt.genSalt(SALT_ROUNDS);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
