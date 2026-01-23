@@ -4,7 +4,13 @@ const controller = require("../controllers/payment.controller");
 
 const router = express.Router();
 
-router.post("/create-intent", auth, controller.createPaymentIntent);
-router.post("/confirm", auth, controller.confirmPayment);
+// Shared middleware
+const authMiddleware = [auth];
+
+// Create payment intent
+router.post("/create-intent", authMiddleware, controller.createPaymentIntent);
+
+// Confirm payment
+router.post("/confirm", authMiddleware, controller.confirmPayment);
 
 module.exports = router;
