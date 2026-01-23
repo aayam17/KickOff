@@ -5,9 +5,19 @@ const controller = require("../controllers/order.controller");
 
 const router = express.Router();
 
-router.post("/", auth, controller.createOrder);
-router.get("/my", auth, controller.getMyOrders);
-router.get("/:id", auth, controller.getOrderById); 
+// Shared middleware
+const authMiddleware = [auth];
+
+// Create order
+router.post("/", authMiddleware, controller.createOrder);
+
+// Get logged-in user's orders
+router.get("/my", authMiddleware, controller.getMyOrders);
+
+// Get order by ID
+router.get("/:id", authMiddleware, controller.getOrderById); 
+
+// Get all orders (admin only)
 router.get("/", auth, role("admin"), controller.getAllOrders);
 
 module.exports = router;
