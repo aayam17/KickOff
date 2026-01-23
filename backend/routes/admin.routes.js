@@ -5,16 +5,19 @@ const productController = require("../controllers/product.controller");
 
 const router = express.Router();
 
+// Shared middleware for admin-only routes
+const adminMiddleware = [auth, role("admin")];
+
 // Create product 
-router.post("/", auth, role("admin"), productController.createProduct);
+router.post("/", adminMiddleware, productController.createProduct);
 
 // Get all products 
-router.get("/", auth, role("admin"), productController.getAllProducts);
+router.get("/", adminMiddleware, productController.getAllProducts);
 
 // Update product
-router.put("/:id", auth, role("admin"), productController.updateProduct);
+router.put("/:id", adminMiddleware, productController.updateProduct);
 
 // Delete product 
-router.delete("/:id", auth, role("admin"), productController.deleteProduct);
+router.delete("/:id", adminMiddleware, productController.deleteProduct);
 
 module.exports = router;
