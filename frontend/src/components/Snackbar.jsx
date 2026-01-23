@@ -3,6 +3,9 @@ import "./Snackbar.css";
 
 const SnackbarContext = createContext();
 
+const DEFAULT_DURATION = 4000;
+const HIDE_ANIMATION_DELAY = 300;
+
 export const useSnackbar = () => {
   const context = useContext(SnackbarContext);
   if (!context) {
@@ -14,46 +17,57 @@ export const useSnackbar = () => {
 export const SnackbarProvider = ({ children }) => {
   const [snackbars, setSnackbars] = useState([]);
 
-  const showSnackbar = useCallback((message, type = "info", duration = 4000) => {
-    const id = Date.now() + Math.random();
-    
-    setSnackbars((prev) => [
-      ...prev,
-      { id, message, type, show: true }
-    ]);
+  // Core snackbar handler
+  const showSnackbar = useCallback(
+    (message, type = "info", duration = DEFAULT_DURATION) => {
+      const id = Date.now() + Math.random();
 
-    setTimeout(() => {
-      setSnackbars((prev) =>
-        prev.map((snack) =>
-          snack.id === id ? { ...snack, show: false } : snack
-        )
-      );
+      setSnackbars((prev) => [
+        ...prev,
+        { id, message, type, show: true }
+      ]);
 
       setTimeout(() => {
-        setSnackbars((prev) => prev.filter((snack) => snack.id !== id));
-      }, 300);
-    }, duration);
-  }, []);
+        setSnackbars((prev) =>
+          prev.map((snack) =>
+            snack.id === id ? { ...snack, show: false } : snack
+          )
+        );
 
-  const success = useCallback((message, duration) => {
-    showSnackbar(message, "success", duration);
-  }, [showSnackbar]);
+        setTimeout(() => {
+          setSnackbars((prev) =>
+            prev.filter((snack) => snack.id !== id)
+          );
+        }, HIDE_ANIMATION_DELAY);
+      }, duration);
+    },
+    []
+  );
 
-  const error = useCallback((message, duration) => {
-    showSnackbar(message, "error", duration);
-  }, [showSnackbar]);
+  const success = useCallback(
+    (message, duration) => showSnackbar(message, "success", duration),
+    [showSnackbar]
+  );
 
-  const warning = useCallback((message, duration) => {
-    showSnackbar(message, "warning", duration);
-  }, [showSnackbar]);
+  const error = useCallback(
+    (message, duration) => showSnackbar(message, "error", duration),
+    [showSnackbar]
+  );
 
-  const info = useCallback((message, duration) => {
-    showSnackbar(message, "info", duration);
-  }, [showSnackbar]);
+  const warning = useCallback(
+    (message, duration) => showSnackbar(message, "warning", duration),
+    [showSnackbar]
+  );
+
+  const info = useCallback(
+    (message, duration) => showSnackbar(message, "info", duration),
+    [showSnackbar]
+  );
 
   return (
     <SnackbarContext.Provider value={{ showSnackbar, success, error, warning, info }}>
       {children}
+
       <div className="snackbar-container">
         {snackbars.map((snackbar) => (
           <div
@@ -84,6 +98,7 @@ export const SnackbarProvider = ({ children }) => {
                 </svg>
               )}
             </div>
+
             <div className="snackbar-message">{snackbar.message}</div>
           </div>
         ))}
