@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 
+const PAYMENT_STATUSES = ["pending", "paid"];
+
 const orderSchema = new mongoose.Schema(
   {
     user: {
@@ -28,14 +30,14 @@ const orderSchema = new mongoose.Schema(
       required: true
     },
 
-    /* Stripe reference */
+    // Stripe reference
     paymentIntentId: {
       type: String
     },
 
     paymentStatus: {
       type: String,
-      enum: ["pending", "paid"],
+      enum: PAYMENT_STATUSES,
       default: "pending"
     }
   },
