@@ -10,7 +10,7 @@ import Loader from "../components/Loader";
 import api from "../api/axios";
 import "./Checkout.css";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "pk_test_51QdUkCRxgxYourPublishableKeyHere");
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 export default function Checkout() {
   const { id } = useParams();
