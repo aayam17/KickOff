@@ -5,32 +5,34 @@ import { useSnackbar } from "./Snackbar";
 import api from "../api/axios";
 import "./CheckoutForm.css";
 
+const PAYMENT_CONFIRM_DELAY = 2000;
+const TEST_CARD_NUMBER = "4242 4242 4242 4242";
+
 export default function CheckoutForm({ clientSecret, orderDetails, onSuccess }) {
   const stripe = useStripe();
   const elements = useElements();
   const { token } = useContext(AuthContext);
+
   const [processing, setProcessing] = useState(false);
   const [succeeded, setSucceeded] = useState(false);
+
   const { success, error } = useSnackbar();
 
+  // Handle Stripe payment submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!stripe || !elements) {
-      return;
-    }
+    if (!stripe || !elements) return;
 
     setProcessing(true);
 
     try {
-      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
-        clientSecret,
-        {
+      const { error: stripeError, paymentIntent } =
+        await stripe.confirmCardPayment(clientSecret, {
           payment_method: {
             card: elements.getElement(CardElement),
           },
-        }
-      );
+        });
 
       if (stripeError) {
         error(stripeError.message);
@@ -47,10 +49,10 @@ export default function CheckoutForm({ clientSecret, orderDetails, onSuccess }) 
 
       setSucceeded(true);
       success("Payment successful! Redirecting to your orders...");
-      
+
       setTimeout(() => {
         onSuccess();
-      }, 2000);
+      }, PAYMENT_CONFIRM_DELAY);
     } catch (err) {
       error(err.response?.data?.message || "Payment failed");
       setProcessing(false);
@@ -84,9 +86,11 @@ export default function CheckoutForm({ clientSecret, orderDetails, onSuccess }) 
           </svg>
           Card Information
         </label>
+
         <div className="card-element-wrapper">
           <CardElement options={cardElementOptions} />
         </div>
+
         <div className="payment-info">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10"/>
@@ -106,8 +110,9 @@ export default function CheckoutForm({ clientSecret, orderDetails, onSuccess }) 
           </svg>
           <strong>Test Mode - Use Test Card:</strong>
         </div>
+
         <div className="test-card-details">
-          <div>Card Number: 4242 4242 4242 4242</div>
+          <div>Card Number: {TEST_CARD_NUMBER}</div>
           <div>Expiry: Any future date (e.g., 12/34)</div>
           <div>CVC: Any 3 digits (e.g., 123)</div>
           <div>ZIP: Any 5 digits (e.g., 12345)</div>
