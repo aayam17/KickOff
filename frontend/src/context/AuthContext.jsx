@@ -2,25 +2,28 @@ import { createContext, useState, useEffect } from "react";
 
 export const AuthContext = createContext();
 
+const AUTH_STORAGE_KEY = "auth";
+
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [role, setRole] = useState(null);
-  const [loading, setLoading] = useState(true); // Added loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("auth"));
+    // Load auth state from localStorage on app start
+    const saved = JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY));
     if (saved) {
       setToken(saved.token);
       setRole(saved.role);
     }
-    setLoading(false); // Finished checking localStorage
+    setLoading(false);
   }, []);
 
   const loginUser = (jwt, userRole) => {
     setToken(jwt);
     setRole(userRole);
     localStorage.setItem(
-      "auth",
+      AUTH_STORAGE_KEY,
       JSON.stringify({ token: jwt, role: userRole })
     );
   };
@@ -28,7 +31,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setRole(null);
-    localStorage.removeItem("auth");
+    localStorage.removeItem(AUTH_STORAGE_KEY);
   };
 
   return (
