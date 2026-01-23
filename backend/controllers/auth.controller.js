@@ -5,21 +5,30 @@ const { validationResult } = require("express-validator");
 const { generateOTP } = require("../utils/otp");
 const { sendOTP } = require("../utils/email");
 
+const BAD_REQUEST = 400;
+const UNAUTHORIZED = 401;
+const CONFLICT = 409;
+const LOCKED = 423;
+const SERVER_ERROR = 500;
+
 const MAX_ATTEMPTS = 5;
 const LOCK_TIME = 15 * 60 * 1000; // 15 minutes
+const OTP_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes
 
 /* REGISTER */
 exports.register = async (req, res) => {
   try {
     const errors = validationResult(req);
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() });
+    if (!errors.isEmpty()) {
+      return res.status(BAD_REQUEST).json({ errors: errors.array() });
+    }
 
     const { name, email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
-    if (existingUser)
-      return res.status(409).json({ message: "Email already registered" });
+    if (existingUser) {
+      return res.status(CONFLICT).json({ message: "Email already registered" });
+    }
 
     const user = await User.create({ name, email, password });
 
@@ -28,7 +37,7 @@ exports.register = async (req, res) => {
       userId: user._id
     });
   } catch {
-    res.status(500).json({ message: "Registration failed" });
+    res.status(SERVER_ERROR).json({ message: "Registration failed" });
   }
 };
 
@@ -38,19 +47,19 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user)
-      return res.status(401).json({ message: "Invalid credentials" });
+    if (!user) {
+      return res.status(UNAUTHORIZED).json({ message: "Invalid credentials" });
+    }
 
-    /* Check lock */
+    // Check lock
     if (user.lockUntil && user.lockUntil > Date.now()) {
-      return res.status(423).json({
+      return res.status(LOCKED).json({
         message: "Account locked. Try again later."
       });
     }
 
     const isMatch = await user.comparePassword(password);
 
-    /* ❗ UPDATED LOCKOUT LOGIC */
     if (!isMatch) {
       user.failedLoginAttempts += 1;
 
@@ -59,18 +68,18 @@ exports.login = async (req, res) => {
       }
 
       await user.save();
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(UNAUTHORIZED).json({ message: "Invalid credentials" });
     }
 
-    /* Reset failed attempts on success */
+    // Reset failed attempts on success
     user.failedLoginAttempts = 0;
     user.lockUntil = undefined;
 
-    /* Generate OTP */
+    // Generate OTP
     const { otp, hashedOtp } = generateOTP();
 
     user.mfaCode = hashedOtp;
-    user.mfaCodeExpiry = Date.now() + 5 * 60 * 1000;
+    user.mfaCodeExpiry = Date.now() + OTP_EXPIRY_TIME;
     user.mfaEnabled = true;
 
     await user.save();
@@ -81,7 +90,7 @@ exports.login = async (req, res) => {
       userId: user._id
     });
   } catch {
-    res.status(500).json({ message: "Login failed" });
+    res.status(SERVER_ERROR).json({ message: "Login failed" });
   }
 };
 
@@ -90,16 +99,19 @@ exports.verifyOTP = async (req, res) => {
   const { userId, otp } = req.body;
 
   const user = await User.findById(userId);
-  if (!user || !user.mfaCodeExpiry)
-    return res.status(400).json({ message: "Invalid request" });
+  if (!user || !user.mfaCodeExpiry) {
+    return res.status(BAD_REQUEST).json({ message: "Invalid request" });
+  }
 
-  if (user.mfaCodeExpiry < Date.now())
-    return res.status(400).json({ message: "OTP expired" });
+  if (user.mfaCodeExpiry < Date.now()) {
+    return res.status(BAD_REQUEST).json({ message: "OTP expired" });
+  }
 
   const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
-  if (hashedOtp !== user.mfaCode)
-    return res.status(401).json({ message: "Invalid OTP" });
+  if (hashedOtp !== user.mfaCode) {
+    return res.status(UNAUTHORIZED).json({ message: "Invalid OTP" });
+  }
 
   user.mfaCode = undefined;
   user.mfaCodeExpiry = undefined;
