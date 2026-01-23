@@ -2,9 +2,17 @@ const mongoose = require("mongoose");
 
 const logSchema = new mongoose.Schema(
   {
-    userId: mongoose.Schema.Types.ObjectId,
-    action: String,
-    ip: String
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    },
+    action: {
+      type: String,
+      required: true
+    },
+    ip: {
+      type: String
+    }
   },
   { timestamps: true }
 );
