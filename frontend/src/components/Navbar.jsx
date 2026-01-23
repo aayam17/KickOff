@@ -8,12 +8,16 @@ export default function Navbar() {
   const { token, role, logout } = useContext(AuthContext);
   const { cart } = useContext(CartContext);
   const navigate = useNavigate();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close mobile menu helper
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   const handleLogout = () => {
     logout();
     navigate("/login");
-    setMobileMenuOpen(false);
+    closeMobileMenu();
   };
 
   const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -21,7 +25,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to="/" className="navbar-logo" onClick={() => setMobileMenuOpen(false)}>
+        <Link to="/" className="navbar-logo" onClick={closeMobileMenu}>
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
             <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
             <path d="M12 2C12 2 8 6 8 12C8 18 12 22 12 22" stroke="currentColor" strokeWidth="2"/>
@@ -32,7 +36,7 @@ export default function Navbar() {
         </Link>
 
         <div className={`navbar-menu ${mobileMenuOpen ? "active" : ""}`}>
-          <Link to="/" className="navbar-link" onClick={() => setMobileMenuOpen(false)}>
+          <Link to="/" className="navbar-link" onClick={closeMobileMenu}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
               <polyline points="9 22 9 12 15 12 15 22"/>
@@ -43,7 +47,7 @@ export default function Navbar() {
           {token ? (
             <>
               {role === "admin" && (
-                <Link to="/admin" className="navbar-link" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/admin" className="navbar-link" onClick={closeMobileMenu}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <rect x="3" y="3" width="7" height="7"/>
                     <rect x="14" y="3" width="7" height="7"/>
@@ -54,7 +58,7 @@ export default function Navbar() {
                 </Link>
               )}
 
-              <Link to="/orders" className="navbar-link" onClick={() => setMobileMenuOpen(false)}>
+              <Link to="/orders" className="navbar-link" onClick={closeMobileMenu}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
                   <line x1="3" y1="6" x2="21" y2="6"/>
@@ -63,7 +67,7 @@ export default function Navbar() {
                 Orders
               </Link>
 
-              <Link to="/profile" className="navbar-link" onClick={() => setMobileMenuOpen(false)}>
+              <Link to="/profile" className="navbar-link" onClick={closeMobileMenu}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
@@ -71,7 +75,7 @@ export default function Navbar() {
                 Profile
               </Link>
 
-              <Link to="/cart" className="navbar-link navbar-cart" onClick={() => setMobileMenuOpen(false)}>
+              <Link to="/cart" className="navbar-link navbar-cart" onClick={closeMobileMenu}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="9" cy="21" r="1"/>
                   <circle cx="20" cy="21" r="1"/>
@@ -94,7 +98,7 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/login" className="navbar-link" onClick={() => setMobileMenuOpen(false)}>
+              <Link to="/login" className="navbar-link" onClick={closeMobileMenu}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
                   <polyline points="10 17 15 12 10 7"/>
@@ -102,14 +106,15 @@ export default function Navbar() {
                 </svg>
                 Login
               </Link>
-              <Link to="/register" className="btn btn-primary navbar-cta" onClick={() => setMobileMenuOpen(false)}>
+
+              <Link to="/register" className="btn btn-primary navbar-cta" onClick={closeMobileMenu}>
                 Get Started
               </Link>
             </>
           )}
         </div>
 
-        <button 
+        <button
           className="navbar-toggle"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
