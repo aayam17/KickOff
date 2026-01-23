@@ -1,6 +1,9 @@
 const stripe = require("../utils/stripe");
 const Order = require("../models/Order.model");
 
+const NOT_FOUND = 404;
+const SERVER_ERROR = 500;
+
 /* Create Stripe Payment Intent */
 exports.createPaymentIntent = async (req, res) => {
   try {
@@ -9,36 +12,37 @@ exports.createPaymentIntent = async (req, res) => {
     // 1. Find the order created by the Cart handleCheckout
     const order = await Order.findById(orderId);
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(NOT_FOUND).json({ message: "Order not found" });
     }
 
-    // 2. CRITICAL FIX: Check if payment intent already exists for this order
+    // 2. Check if payment intent already exists for this order
     if (order.paymentIntentId) {
-      // Retrieve existing payment intent from Stripe
       try {
-        const existingIntent = await stripe.paymentIntents.retrieve(order.paymentIntentId);
-        
-        // If intent exists and is still valid, return it
-        if (existingIntent && existingIntent.status !== 'succeeded') {
+        const existingIntent = await stripe.paymentIntents.retrieve(
+          order.paymentIntentId
+        );
+
+        if (existingIntent && existingIntent.status !== "succeeded") {
           return res.json({
             clientSecret: existingIntent.client_secret
           });
         }
       } catch (stripeError) {
-        console.log("Existing payment intent not found, creating new one");
-        // If stripe can't find it, we'll create a new one below
+        console.log(
+          "Existing payment intent not found, creating new one"
+        );
       }
     }
 
-    // 3. Create the intent with Stripe (Amount in cents)
+    // 3. Create the intent with Stripe (amount in cents)
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(order.totalAmount * 100), 
+      amount: Math.round(order.totalAmount * 100),
       currency: "usd",
-      metadata: { 
+      metadata: {
         orderId: order._id.toString(),
-        userId: req.user.id // Good for tracking in Stripe Dashboard
+        userId: req.user.id
       },
-      automatic_payment_methods: { enabled: true },
+      automatic_payment_methods: { enabled: true }
     });
 
     // 4. Link the Stripe ID to our database order
@@ -50,7 +54,9 @@ exports.createPaymentIntent = async (req, res) => {
     });
   } catch (err) {
     console.error("Stripe Error:", err);
-    res.status(500).json({ message: "Payment initialization failed" });
+    res.status(SERVER_ERROR).json({
+      message: "Payment initialization failed"
+    });
   }
 };
 
@@ -61,10 +67,10 @@ exports.confirmPayment = async (req, res) => {
 
     const order = await Order.findOne({ paymentIntentId });
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(NOT_FOUND).json({ message: "Order not found" });
     }
 
-    // Only update if not already paid (prevent duplicate updates)
+    // Prevent duplicate updates
     if (order.paymentStatus !== "paid") {
       order.paymentStatus = "paid";
       await order.save();
@@ -72,6 +78,8 @@ exports.confirmPayment = async (req, res) => {
 
     res.json({ message: "Payment confirmed successfully" });
   } catch (err) {
-    res.status(500).json({ message: "Error confirming payment" });
+    res.status(SERVER_ERROR).json({
+      message: "Error confirming payment"
+    });
   }
 };
