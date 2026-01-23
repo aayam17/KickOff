@@ -1,12 +1,16 @@
 const Product = require("../models/Product.model");
 
+const CREATED = 201;
+const BAD_REQUEST = 400;
+const SERVER_ERROR = 500;
+
 /* PUBLIC: Get all products */
 exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.find();
     res.json(products);
   } catch {
-    res.status(500).json({ message: "Failed to fetch products" });
+    res.status(SERVER_ERROR).json({ message: "Failed to fetch products" });
   }
 };
 
@@ -14,9 +18,9 @@ exports.getAllProducts = async (req, res) => {
 exports.createProduct = async (req, res) => {
   try {
     const product = await Product.create(req.body);
-    res.status(201).json(product);
+    res.status(CREATED).json(product);
   } catch {
-    res.status(400).json({ message: "Failed to create product" });
+    res.status(BAD_REQUEST).json({ message: "Failed to create product" });
   }
 };
 
@@ -30,7 +34,7 @@ exports.updateProduct = async (req, res) => {
     );
     res.json(updated);
   } catch {
-    res.status(400).json({ message: "Failed to update product" });
+    res.status(BAD_REQUEST).json({ message: "Failed to update product" });
   }
 };
 
@@ -40,6 +44,6 @@ exports.deleteProduct = async (req, res) => {
     await Product.findByIdAndDelete(req.params.id);
     res.json({ message: "Product deleted" });
   } catch {
-    res.status(400).json({ message: "Failed to delete product" });
+    res.status(BAD_REQUEST).json({ message: "Failed to delete product" });
   }
 };
