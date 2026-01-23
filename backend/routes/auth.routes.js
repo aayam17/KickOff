@@ -8,14 +8,23 @@ const router = express.Router();
 router.post(
   "/register",
   [
-    body("name").notEmpty(),
-    body("email").isEmail(),
+    body("name")
+      .notEmpty()
+      .withMessage("Name is required"),
+    body("email")
+      .isEmail()
+      .withMessage("Valid email is required"),
     body("password")
       .isLength({ min: 12 })
+      .withMessage("Password must be at least 12 characters long")
       .matches(/[A-Z]/)
+      .withMessage("Password must contain an uppercase letter")
       .matches(/[a-z]/)
+      .withMessage("Password must contain a lowercase letter")
       .matches(/[0-9]/)
+      .withMessage("Password must contain a number")
       .matches(/[^A-Za-z0-9]/)
+      .withMessage("Password must contain a special character")
   ],
   authController.register
 );
@@ -24,8 +33,12 @@ router.post(
 router.post(
   "/login",
   [
-    body("email").isEmail(),
-    body("password").exists()
+    body("email")
+      .isEmail()
+      .withMessage("Valid email is required"),
+    body("password")
+      .exists()
+      .withMessage("Password is required")
   ],
   authController.login
 );
