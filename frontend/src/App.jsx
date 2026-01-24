@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import AdminDashboard from "./pages/AdminDashboard";
+import AuditLogs from "./pages/AuditLogs";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Checkout from "./pages/Checkout";
@@ -88,6 +89,17 @@ function App() {
               <ProtectedRoute>
                 <AdminRoute>
                   <AdminDashboard />
+                </AdminRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/logs"
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <AuditLogs />
                 </AdminRoute>
               </ProtectedRoute>
             }
