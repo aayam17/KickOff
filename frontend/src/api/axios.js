@@ -3,6 +3,7 @@ import { getCsrfToken, clearCsrfToken } from "../utils/csrf";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5001/api",
+  withCredentials: true, // Enable sending cookies with requests
 });
 
 // Request interceptor - add token to all requests
@@ -22,7 +23,7 @@ api.interceptors.request.use(
       if (methodsNeedingCsrf.includes(config.method.toUpperCase())) {
         try {
           const csrfToken = await getCsrfToken();
-          config.headers['CSRF-Token'] = csrfToken;
+          config.headers['csrf-token'] = csrfToken;
         } catch (csrfError) {
           console.error('Failed to get CSRF token:', csrfError);
           // Continue without CSRF token - server will reject if needed
@@ -61,7 +62,7 @@ api.interceptors.response.use(
         clearCsrfToken();
         try {
           const csrfToken = await getCsrfToken();
-          error.config.headers['CSRF-Token'] = csrfToken;
+          error.config.headers['csrf-token'] = csrfToken;
           return api.request(error.config);
         } catch (csrfError) {
           console.error('Failed to refresh CSRF token:', csrfError);
