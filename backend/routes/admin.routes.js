@@ -3,6 +3,7 @@ const auth = require("../middleware/auth.middleware");
 const role = require("../middleware/role.middleware");
 const productController = require("../controllers/product.controller");
 const auditLogController = require("../controllers/auditLog.controller");
+const { csrfProtection } = require("../middleware/csrf.middleware");
 
 const router = express.Router();
 
@@ -14,16 +15,16 @@ const adminMiddleware = [auth, role("admin")];
 // ============================================
 
 // Create product 
-router.post("/products", adminMiddleware, productController.createProduct);
+router.post("/products", csrfProtection, adminMiddleware, productController.createProduct);
 
 // Get all products 
 router.get("/products", adminMiddleware, productController.getAllProducts);
 
 // Update product
-router.put("/products/:id", adminMiddleware, productController.updateProduct);
+router.put("/products/:id", csrfProtection, adminMiddleware, productController.updateProduct);
 
 // Delete product 
-router.delete("/products/:id", adminMiddleware, productController.deleteProduct);
+router.delete("/products/:id", csrfProtection, adminMiddleware, productController.deleteProduct);
 
 // ============================================
 // AUDIT LOG ROUTES

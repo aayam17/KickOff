@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const { csrfErrorHandler } = require("./middleware/csrf.middleware");
 
 const app = express();
 
@@ -17,6 +19,9 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// Cookie parser - required for CSRF tokens
+app.use(cookieParser());
 
 // Security: Disable X-Powered-By header to hide Express
 app.disable("x-powered-by");
@@ -41,6 +46,7 @@ app.use((req, res, next) => {
 });
 
 // API Routes
+app.use("/api/security", require("./routes/csrf.routes")); // CSRF token endpoint
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/user", require("./routes/user.routes"));
 app.use("/api/admin", require("./routes/admin.routes"));
@@ -54,6 +60,9 @@ app.get("/", (req, res) => {
     environment: isProduction ? "production" : "development"
   });
 });
+
+// CSRF error handler - must be before general error handler
+app.use(csrfErrorHandler);
 
 // Error handling middleware - Don't leak stack traces in production
 app.use((err, req, res, next) => {

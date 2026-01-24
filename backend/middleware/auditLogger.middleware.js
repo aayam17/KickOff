@@ -2,12 +2,12 @@ const AuditLog = require('../models/AuditLog.model');
 
 /**
  * Create an audit log entry
- * @param {String} userId - User ID who performed the action
- * @param {String} username - Username of the user
- * @param {String} action - Action type (LOGIN, LOGOUT, etc.)
- * @param {Object} req - Express request object
- * @param {String} status - Status of the action (SUCCESS, FAILURE, WARNING)
- * @param {Object} details - Additional details about the action
+ * @param {String} userId 
+ * @param {String} username 
+ * @param {String} action 
+ * @param {Object} req 
+ * @param {String} status 
+ * @param {Object} details 
  */
 const createAuditLog = async (userId, username, action, req, status = 'SUCCESS', details = {}) => {
   try {

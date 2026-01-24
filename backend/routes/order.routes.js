@@ -2,6 +2,7 @@ const express = require("express");
 const auth = require("../middleware/auth.middleware");
 const role = require("../middleware/role.middleware");
 const controller = require("../controllers/order.controller");
+const { csrfProtection } = require("../middleware/csrf.middleware");
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ const router = express.Router();
 const authMiddleware = [auth];
 
 // Create order
-router.post("/", authMiddleware, controller.createOrder);
+router.post("/", csrfProtection, authMiddleware, controller.createOrder);
 
 // Get logged-in user's orders
 router.get("/my", authMiddleware, controller.getMyOrders);

@@ -1,6 +1,7 @@
 const express = require("express");
 const auth = require("../middleware/auth.middleware");
 const controller = require("../controllers/payment.controller");
+const { csrfProtection } = require("../middleware/csrf.middleware");
 
 const router = express.Router();
 
@@ -8,9 +9,9 @@ const router = express.Router();
 const authMiddleware = [auth];
 
 // Create payment intent
-router.post("/create-intent", authMiddleware, controller.createPaymentIntent);
+router.post("/create-intent", csrfProtection, authMiddleware, controller.createPaymentIntent);
 
 // Confirm payment
-router.post("/confirm", authMiddleware, controller.confirmPayment);
+router.post("/confirm", csrfProtection, authMiddleware, controller.confirmPayment);
 
 module.exports = router;
