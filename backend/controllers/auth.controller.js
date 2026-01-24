@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const { validationResult } = require("express-validator");
 const { generateOTP } = require("../utils/otp");
 const { sendOTP } = require("../utils/email");
+const { createAuditLog } = require("../middleware/auditLogger.middleware");
 
 const BAD_REQUEST = 400;
 const UNAUTHORIZED = 401;
@@ -32,6 +33,16 @@ exports.register = async (req, res) => {
 
     const user = await User.create({ name, email, password });
 
+    // Log registration
+    await createAuditLog(
+      user._id,
+      email,
+      'REGISTER',
+      req,
+      'SUCCESS',
+      { name }
+    );
+
     res.status(201).json({
       message: "User registered securely",
       userId: user._id
@@ -48,11 +59,30 @@ exports.login = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
+      // Log failed login attempt (user not found)
+      // Use a placeholder ID for non-existent users
+      await createAuditLog(
+        '000000000000000000000000',
+        email,
+        'FAILED_LOGIN',
+        req,
+        'FAILURE',
+        { reason: 'User not found' }
+      );
       return res.status(UNAUTHORIZED).json({ message: "Invalid credentials" });
     }
 
     // Check lock
     if (user.lockUntil && user.lockUntil > Date.now()) {
+      // Log locked account access attempt
+      await createAuditLog(
+        user._id,
+        email,
+        'FAILED_LOGIN',
+        req,
+        'WARNING',
+        { reason: 'Account locked' }
+      );
       return res.status(LOCKED).json({
         message: "Account locked. Try again later."
       });
@@ -65,7 +95,27 @@ exports.login = async (req, res) => {
 
       if (user.failedLoginAttempts >= MAX_ATTEMPTS) {
         user.lockUntil = Date.now() + LOCK_TIME;
+        
+        // Log account lock
+        await createAuditLog(
+          user._id,
+          email,
+          'ACCOUNT_LOCKED',
+          req,
+          'WARNING',
+          { attempts: user.failedLoginAttempts }
+        );
       }
+
+      // Log failed login
+      await createAuditLog(
+        user._id,
+        email,
+        'FAILED_LOGIN',
+        req,
+        'FAILURE',
+        { reason: 'Invalid password', attempts: user.failedLoginAttempts }
+      );
 
       await user.save();
       return res.status(UNAUTHORIZED).json({ message: "Invalid credentials" });
@@ -117,8 +167,18 @@ exports.verifyOTP = async (req, res) => {
   user.mfaCodeExpiry = undefined;
   await user.save();
 
+  // Log successful login after OTP verification
+  await createAuditLog(
+    user._id,
+    user.email,
+    'LOGIN',
+    req,
+    'SUCCESS',
+    { method: 'OTP' }
+  );
+
   const token = jwt.sign(
-    { id: user._id, role: user.role },
+    { id: user._id, role: user.role, email: user.email },
     process.env.JWT_SECRET,
     { expiresIn: "15m" }
   );
