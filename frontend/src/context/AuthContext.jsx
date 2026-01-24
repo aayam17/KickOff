@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect } from "react";
+import { clearCsrfToken } from "../utils/csrf";
 
 export const AuthContext = createContext();
 
@@ -32,6 +33,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setRole(null);
     localStorage.removeItem(AUTH_STORAGE_KEY);
+    clearCsrfToken(); // Clear CSRF token on logout
   };
 
   return (

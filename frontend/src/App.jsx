@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
 import { SnackbarProvider } from "./components/Snackbar";
+import { fetchCsrfToken } from "./utils/csrf";
 
 import Home from "./pages/Home";
 import Cart from "./pages/Cart";
@@ -24,6 +26,13 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
 function App() {
+  // Fetch CSRF token on app initialization
+  useEffect(() => {
+    fetchCsrfToken().catch(err => {
+      console.error('Failed to initialize CSRF token:', err);
+    });
+  }, []);
+
   return (
     <SnackbarProvider>
       <BrowserRouter>
