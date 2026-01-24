@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KickOff Token Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .test-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-success {
+            background: #28a745;
+        }
+        
+        .status-error {
+            background: #dc3545;
+        }
+        
+        .status-warning {
+            background: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 KickOff Token Tester</h1>
+        <p class="subtitle">Test your authentication and token handling</p>
+        
+        <div class="test-section">
+            <h2>1️⃣ Check Current Token</h2>
+            <button onclick="checkToken()">Check Token</button>
+            <div id="token-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>2️⃣ Test API Connection</h2>
+            <button onclick="testAPI()">Test API</button>
+            <div id="api-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>3️⃣ Simulate Token Scenarios</h2>
+            <button onclick="setValidToken()">Set Valid Token</button>
+            <button onclick="setExpiredToken()">Set Expired Token</button>
+            <button onclick="setInvalidToken()">Set Invalid Token</button>
+            <button onclick="clearToken()">Clear Token</button>
+            <div id="scenario-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>4️⃣ Test Checkout Flow</h2>
+            <button onclick="testCheckoutAuth()">Test Checkout Auth</button>
+            <div id="checkout-result"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:5001/api';
+        
+        function checkToken() {
+            const result = document.getElementById('token-result');
+            try {
+                const auth = JSON.parse(localStorage.getItem('auth'));
+                if (!auth) {
+                    result.innerHTML = '<div class="result error"><span class="status-indicator status-error"></span>No token found. Please login.</div>';
+                    return;
+                }
+                
+                const tokenPreview = auth.token.substring(0, 20) + '...';
+                result.innerHTML = `
+                    <div class="result success">
+                        <span class="status-indicator status-success"></span>
+                        <strong>Token Found!</strong><br>
+                        Role: ${auth.role}<br>
+                        Token: ${tokenPreview}<br>
+                        Full Length: ${auth.token.length} characters
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="result error"><span class="status-indicator status-error"></span>Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testAPI() {
+            const result = document.getElementById('api-result');
+            result.innerHTML = '<div class="result info">Testing API connection...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/products`);
+                if (response.ok) {
+                    const data = await response.json();
+                    result.innerHTML = `
+                        <div class="result success">
+                            <span class="status-indicator status-success"></span>
+                            <strong>API Connected!</strong><br>
+                            Found ${data.length} products<br>
+                            Endpoint: ${API_URL}/products
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `<div class="result error"><span class="status-indicator status-error"></span>API returned status: ${response.status}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="result error">
+                        <span class="status-indicator status-error"></span>
+                        <strong>API Connection Failed</strong><br>
+                        Error: ${error.message}<br>
+                        Make sure backend is running on port 5001
+                    </div>
+                `;
+            }
+        }
+        
+        function setValidToken() {
+            // This is a mock - in real scenario, get this from login
+            const result = document.getElementById('scenario-result');
+            result.innerHTML = `
+                <div class="result info">
+                    <span class="status-indicator status-warning"></span>
+                    <strong>Note:</strong> To set a valid token, please login through the application.<br>
+                    Valid tokens are generated on successful login at <code>/login</code>
+                </div>
+            `;
+        }
+        
+        function setExpiredToken() {
+            const expiredToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMzQ1Njc4OTAiLCJyb2xlIjoidXNlciIsImV4cCI6MTYwMDAwMDAwMH0.test';
+            localStorage.setItem('auth', JSON.stringify({
+                token: expiredToken,
+                role: 'user'
+            }));
+            
+            const result = document.getElementById('scenario-result');
+            result.innerHTML = `
+                <div class="result success">
+                    <span class="status-indicator status-success"></span>
+                    <strong>Expired Token Set</strong><br>
+                    Try navigating to checkout - you should be redirected to login
+                </div>
+            `;
+        }
+        
+        function setInvalidToken() {
+            localStorage.setItem('auth', JSON.stringify({
+                token: 'invalid_token_12345',
+                role: 'user'
+            }));
+            
+            const result = document.getElementById('scenario-result');
+            result.innerHTML = `
+                <div class="result success">
+                    <span class="status-indicator status-success"></span>
+                    <strong>Invalid Token Set</strong><br>
+                    Try making an authenticated request - it should fail with 401
+                </div>
+            `;
+        }
+        
+        function clearToken() {
+            localStorage.removeItem('auth');
+            const result = document.getElementById('scenario-result');
+            result.innerHTML = `
+                <div class="result success">
+                    <span class="status-indicator status-success"></span>
+                    <strong>Token Cleared</strong><br>
+                    localStorage has been cleared. Try accessing protected routes.
+                </div>
+            `;
+        }
+        
+        async function testCheckoutAuth() {
+            const result = document.getElementById('checkout-result');
+            result.innerHTML = '<div class="result info">Testing checkout authentication...</div>';
+            
+            try {
+                const auth = JSON.parse(localStorage.getItem('auth'));
+                if (!auth || !auth.token) {
+                    result.innerHTML = `
+                        <div class="result error">
+                            <span class="status-indicator status-error"></span>
+                            <strong>No Token Found</strong><br>
+                            You would be redirected to login page.<br>
+                            Please login first to test checkout.
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Test create order endpoint
+                const response = await fetch(`${API_URL}/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${auth.token}`
+                    },
+                    body: JSON.stringify({
+                        products: [],
+                        totalAmount: 0
+                    })
+                });
+                
+                if (response.status === 401) {
+                    const error = await response.json();
+                    result.innerHTML = `
+                        <div class="result error">
+                            <span class="status-indicator status-error"></span>
+                            <strong>Authentication Failed</strong><br>
+                            Status: 401<br>
+                            Message: ${error.message}<br>
+                            Code: ${error.code || 'N/A'}<br>
+                            <br>
+                            <strong>Solution:</strong> Your token is invalid or expired. Please login again.
+                        </div>
+                    `;
+                } else if (response.ok) {
+                    result.innerHTML = `
+                        <div class="result success">
+                            <span class="status-indicator status-success"></span>
+                            <strong>Authentication Successful!</strong><br>
+                            Your token is valid and checkout should work.<br>
+                            Status: ${response.status}
+                        </div>
+                    `;
+                } else {
+                    const error = await response.json();
+                    result.innerHTML = `
+                        <div class="result error">
+                            <span class="status-indicator status-error"></span>
+                            Status: ${response.status}<br>
+                            Message: ${error.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="result error">
+                        <span class="status-indicator status-error"></span>
+                        <strong>Test Failed</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Auto-check token on load
+        window.addEventListener('load', checkToken);
+    </script>
+</body>
+</html>
