@@ -1,13 +1,17 @@
 const csrf = require('csurf');
 
 // CSRF protection middleware
-// Using cookie-based tokens for stateless operation
 const csrfProtection = csrf({
   cookie: {
+    key: '_csrf',
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: 'strict', // Prevents CSRF attacks
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // Use 'lax' in development
     maxAge: 3600000 // 1 hour
+  },
+  value: (req) => {
+    // Check for token in custom header first, then fall back to body/query
+    return req.headers['csrf-token'] || req.body._csrf || req.query._csrf;
   }
 });
 
