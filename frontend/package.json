@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:http": "vite --host 0.0.0.0 --port 5173",
+    "dev:https": "vite --host 0.0.0.0 --port 5173",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:https": "vite preview --https"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^5.4.1",

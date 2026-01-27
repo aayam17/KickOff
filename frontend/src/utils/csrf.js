@@ -1,7 +1,13 @@
-import api from '../api/axios';
+import axios from 'axios';
 
 // Store CSRF token in memory
 let csrfToken = null;
+
+// Create a separate axios instance without interceptors for fetching CSRF token
+const csrfAxios = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5001/api",
+  withCredentials: true,
+});
 
 /**
  * Fetch CSRF token from server
@@ -9,7 +15,8 @@ let csrfToken = null;
  */
 export const fetchCsrfToken = async () => {
   try {
-    const response = await api.get('/security/csrf-token');
+    // Use the plain axios instance to avoid interceptor loops
+    const response = await csrfAxios.get('/security/csrf-token');
     if (response.data.success && response.data.csrfToken) {
       csrfToken = response.data.csrfToken;
       return csrfToken;

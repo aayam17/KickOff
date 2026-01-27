@@ -1,5 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import fs from 'fs'
+import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -33,8 +35,15 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 1000,
     },
     
-    // Security headers
+    // Development server configuration
     server: {
+      // HTTPS configuration
+      https: {
+        key: fs.readFileSync(path.resolve(__dirname, '../backend/ssl/localhost-key.pem')),
+        cert: fs.readFileSync(path.resolve(__dirname, '../backend/ssl/localhost.pem')),
+      },
+      port: 5173,
+      // Security headers
       headers: {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
