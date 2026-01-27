@@ -12,7 +12,16 @@ const isProduction = process.env.NODE_ENV === "production";
 const corsOptions = {
   origin: isProduction 
     ? process.env.FRONTEND_URL || ["https://yourdomain.com"] // Set your production domain
-    : ["http://localhost:5173", "http://localhost:5174"],
+    : [
+        // HTTP origins
+        "http://localhost:5173", 
+        "http://localhost:5174",
+        // HTTPS origins
+        "https://localhost:5173", 
+        "https://localhost:5174",
+        // Network access (for mobile testing)
+        "https://192.168.2.120:5173"
+      ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "CSRF-Token", "csrf-token"],
@@ -54,6 +63,11 @@ app.use("/api/admin", require("./routes/admin.routes"));
 app.use("/api/products", require("./routes/product.routes")); 
 app.use("/api/orders", require("./routes/order.routes"));
 app.use("/api/payments", require("./routes/payment.routes"));
+
+// Test routes (development only)
+if (!isProduction) {
+  app.use("/api/test", require("./routes/test.routes"));
+}
 
 app.get("/", (req, res) => {
   res.json({ 

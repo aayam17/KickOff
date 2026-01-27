@@ -1,14 +1,12 @@
 const express = require("express");
 const { body } = require("express-validator");
 const authController = require("../controllers/auth.controller");
-const { csrfProtection } = require("../middleware/csrf.middleware");
 
 const router = express.Router();
 
 // Register 
 router.post(
   "/register",
-  csrfProtection, // CSRF protection
   [
     body("name")
       .notEmpty()
@@ -34,7 +32,6 @@ router.post(
 // Login 
 router.post(
   "/login",
-  csrfProtection, // CSRF protection
   [
     body("email")
       .isEmail()
@@ -47,6 +44,6 @@ router.post(
 );
 
 // Verify OTP (MFA) 
-router.post("/verify-otp", csrfProtection, authController.verifyOTP);
+router.post("/verify-otp", authController.verifyOTP);
 
 module.exports = router;

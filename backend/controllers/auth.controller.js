@@ -47,7 +47,8 @@ exports.register = async (req, res) => {
       message: "User registered securely",
       userId: user._id
     });
-  } catch {
+  } catch (error) {
+    console.error("Registration error:", error);
     res.status(SERVER_ERROR).json({ message: "Registration failed" });
   }
 };
@@ -59,8 +60,6 @@ exports.login = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      // Log failed login attempt (user not found)
-      // Use a placeholder ID for non-existent users
       await createAuditLog(
         '000000000000000000000000',
         email,
@@ -74,7 +73,6 @@ exports.login = async (req, res) => {
 
     // Check lock
     if (user.lockUntil && user.lockUntil > Date.now()) {
-      // Log locked account access attempt
       await createAuditLog(
         user._id,
         email,
@@ -96,7 +94,6 @@ exports.login = async (req, res) => {
       if (user.failedLoginAttempts >= MAX_ATTEMPTS) {
         user.lockUntil = Date.now() + LOCK_TIME;
         
-        // Log account lock
         await createAuditLog(
           user._id,
           email,
@@ -107,7 +104,6 @@ exports.login = async (req, res) => {
         );
       }
 
-      // Log failed login
       await createAuditLog(
         user._id,
         email,
@@ -133,59 +129,69 @@ exports.login = async (req, res) => {
     user.mfaEnabled = true;
 
     await user.save();
-    await sendOTP(user.email, otp);
 
+    // Send OTP email in background (non-blocking)
+    sendOTP(user.email, otp).catch(err => console.error("Email error:", err));
+
+    // Return immediately
     res.json({
       message: "OTP sent to email",
       userId: user._id
     });
-  } catch {
+
+  } catch (error) {
+    console.error("Login error:", error);
     res.status(SERVER_ERROR).json({ message: "Login failed" });
   }
 };
 
 /* VERIFY OTP */
 exports.verifyOTP = async (req, res) => {
-  const { userId, otp } = req.body;
+  try {
+    const { userId, otp } = req.body;
 
-  const user = await User.findById(userId);
-  if (!user || !user.mfaCodeExpiry) {
-    return res.status(BAD_REQUEST).json({ message: "Invalid request" });
+    const user = await User.findById(userId);
+    if (!user || !user.mfaCodeExpiry) {
+      return res.status(BAD_REQUEST).json({ message: "Invalid request" });
+    }
+
+    if (user.mfaCodeExpiry < Date.now()) {
+      return res.status(BAD_REQUEST).json({ message: "OTP expired" });
+    }
+
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+    if (hashedOtp !== user.mfaCode) {
+      return res.status(UNAUTHORIZED).json({ message: "Invalid OTP" });
+    }
+
+    user.mfaCode = undefined;
+    user.mfaCodeExpiry = undefined;
+    await user.save();
+
+    // Log successful login after OTP verification
+    await createAuditLog(
+      user._id,
+      user.email,
+      'LOGIN',
+      req,
+      'SUCCESS',
+      { method: 'OTP' }
+    );
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    res.json({
+      message: "MFA verified",
+      token,
+      role: user.role
+    });
+  } catch (error) {
+    console.error("OTP verification error:", error);
+    res.status(SERVER_ERROR).json({ message: "Verification failed" });
   }
-
-  if (user.mfaCodeExpiry < Date.now()) {
-    return res.status(BAD_REQUEST).json({ message: "OTP expired" });
-  }
-
-  const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
-
-  if (hashedOtp !== user.mfaCode) {
-    return res.status(UNAUTHORIZED).json({ message: "Invalid OTP" });
-  }
-
-  user.mfaCode = undefined;
-  user.mfaCodeExpiry = undefined;
-  await user.save();
-
-  // Log successful login after OTP verification
-  await createAuditLog(
-    user._id,
-    user.email,
-    'LOGIN',
-    req,
-    'SUCCESS',
-    { method: 'OTP' }
-  );
-
-  const token = jwt.sign(
-    { id: user._id, role: user.role, email: user.email },
-    process.env.JWT_SECRET,
-    { expiresIn: "15m" }
-  );
-
-  res.json({
-    message: "MFA verified",
-    token,
-    role: user.role
-  });
 };
